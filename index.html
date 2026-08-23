@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAISON BAGS | 럭셔리 패션 가방 & 핸드백 3D 쇼핑몰</title>
+  <meta name="description" content="실시간 3D 가죽 및 메탈 색상 커스터마이징이 가능한 럭셔리 핸드백 & 가방 쇼핑몰 MAISON BAGS" />
+  
+  <!-- Google Fonts: Playfair Display, Outfit & Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & OrbitControls via CDN (No server build required!) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       MAISON BAGS - Luxury Fashion Design System
+       ========================================================================== */
+    :root {
+      --bg-dark: #08070b;
+      --bg-card: rgba(18, 16, 26, 0.75);
+      --bg-card-hover: rgba(28, 25, 40, 0.9);
+      --glass-border: rgba(212, 175, 55, 0.18);
+      --gold-primary: #d4af37;
+      --gold-light: #f3e5ab;
+      --gold-dark: #996515;
+      --rose-gold: #b76e79;
+      --text-main: #fcfbf9;
+      --text-muted: #a3a1ab;
+
+      --font-serif: 'Playfair Display', serif;
+      --font-sans: 'Outfit', 'Noto Sans KR', sans-serif;
+
+      --radius-sm: 6px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-pill: 9999px;
+
+      --shadow-gold: 0 0 25px rgba(212, 175, 55, 0.2);
+      --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 90% 60%, rgba(183, 110, 121, 0.06) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #222030; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold-primary); }
+
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    /* 1. Header & Navigation */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 7, 11, 0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      padding: 1.1rem 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-logo .highlight {
+      color: var(--gold-primary);
+      font-style: italic;
+    }
+
+    .logo-badge {
+      font-family: var(--font-sans);
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+      color: #000;
+      border-radius: var(--radius-pill);
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      transition: var(--transition-smooth);
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--gold-primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border-radius: var(--radius-pill);
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      width: 190px;
+      transition: var(--transition-smooth);
+    }
+
+    .search-box input:focus {
+      width: 240px;
+      border-color: var(--gold-primary);
+      box-shadow: var(--shadow-gold);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.9rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .cart-trigger-btn {
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition-smooth);
+    }
+
+    .cart-trigger-btn:hover {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: var(--gold-primary);
+      box-shadow: var(--shadow-gold);
+    }
+
+    .cart-count-badge {
+      background: var(--gold-primary);
+      color: #000;
+      font-size: 0.75rem;
+      font-weight: 900;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 2. MD Recommended Product Showcase (Centered 3D Hero) */
+    .md-showcase-section {
+      max-width: 1300px;
+      margin: 2.5rem auto 4.5rem;
+      padding: 0 1.5rem;
+    }
+
+    .section-header-centered {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      color: var(--gold-primary);
+      padding: 0.35rem 1.1rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .section-header-centered h1 {
+      font-family: var(--font-serif);
+      font-size: 2.7rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-header-centered p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .showcase-grid-centered {
+      display: grid;
+      grid-template-columns: 1fr 430px;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    @media (max-width: 1024px) {
+      .showcase-grid-centered {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .canvas-showcase-frame {
+      position: relative;
+      width: 100%;
+      height: 560px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 50%, rgba(32, 28, 48, 0.8) 0%, rgba(8, 7, 11, 0.98) 100%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .canvas-showcase-frame canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      outline: none;
+      cursor: grab;
+    }
+
+    .canvas-showcase-frame canvas:active { cursor: grabbing; }
+
+    .canvas-controls-overlay {
+      position: absolute;
+      bottom: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.75rem;
+      background: rgba(12, 11, 18, 0.85);
+      backdrop-filter: blur(12px);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--glass-border);
+      z-index: 10;
+    }
+
+    .ctrl-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid transparent;
+      color: var(--text-main);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition-smooth);
+    }
+
+    .ctrl-btn:hover, .ctrl-btn.active {
+      background: var(--gold-primary);
+      color: #000;
+    }
+
+    .canvas-tag {
+      position: absolute;
+      top: 1.25rem;
+      left: 1.25rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .tag-badge {
+      background: rgba(212, 175, 55, 0.2);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      color: var(--gold-light);
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.8rem;
+      border-radius: var(--radius-pill);
+    }
+
+    .customizer-panel {
+      padding: 2.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .toy-title-group h2 {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .toy-edition {
+      color: var(--gold-primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .price-display {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      margin-top: 0.6rem;
+    }
+
+    .price-main {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .price-original {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .customizer-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold-light);
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preset-colors-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+    }
+
+    .preset-btn {
+      height: 38px;
+      border-radius: var(--radius-sm);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .preset-btn:hover { transform: translateY(-2px); }
+    .preset-btn.active {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 12px var(--gold-primary);
+    }
+
+    .slot-pickers-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .color-picker-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-md);
+    }
+
+    .color-picker-row span {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .color-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .color-input-wrapper input[type="color"] {
+      -webkit-appearance: none;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      background: none;
+    }
+
+    .color-input-wrapper input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-input-wrapper input[type="color"]::-webkit-color-swatch {
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+    }
+
+    .hex-code {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      width: 65px;
+    }
+
+    .material-toggle-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .mat-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.5rem 0;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition-smooth);
+    }
+
+    .mat-btn:hover, .mat-btn.active {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: var(--gold-primary);
+      color: #fff;
+    }
+
+    .add-to-cart-hero-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold-primary), #996515);
+      color: #000;
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 1.05rem;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+      transition: var(--transition-smooth);
+    }
+
+    .add-to-cart-hero-btn:hover {
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #f3e5ab, var(--gold-primary));
+      box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+    }
+
+    /* 3. Popular Products List (7 Initial items + '더보기' button) */
+    .popular-products-section {
+      max-width: 1300px;
+      margin: 0 auto 5rem;
+      padding: 0 1.5rem;
+    }
+
+    .products-header-bar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2.2rem;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 1.2rem;
+    }
+
+    .products-header-bar h2 {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      font-weight: 700;
+    }
+
+    .products-count-badge {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .category-tabs { display: flex; gap: 0.5rem; }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 0.45rem 1.1rem;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--gold-primary);
+      border-color: var(--glass-border);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.6rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .product-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition-smooth);
+      animation: fadeInCard 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeInCard {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--gold-primary);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), var(--shadow-gold);
+    }
+
+    .card-img-wrapper {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      background: radial-gradient(circle at 50% 50%, rgba(38, 34, 56, 0.8), rgba(12, 10, 18, 0.95));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .card-img-wrapper svg {
+      max-width: 75%;
+      max-height: 75%;
+      transition: var(--transition-smooth);
+    }
+
+    .product-card:hover .card-img-wrapper svg {
+      transform: scale(1.08) rotate(-2deg);
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-pill);
+      text-transform: uppercase;
+    }
+
+    .card-badge.hot { background: rgba(183, 110, 121, 0.3); color: var(--rose-gold); border: 1px solid var(--rose-gold); }
+    .card-badge.best { background: rgba(212, 175, 55, 0.3); color: var(--gold-primary); border: 1px solid var(--gold-primary); }
+    .card-badge.limited { background: rgba(243, 229, 171, 0.3); color: var(--gold-light); border: 1px solid var(--gold-light); }
+
+    .card-quick-btn {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(12, 11, 18, 0.85);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: var(--transition-smooth);
+    }
+
+    .product-card:hover .card-quick-btn { opacity: 1; transform: translateY(0); }
+    .card-quick-btn:hover { background: var(--gold-primary); color: #000; }
+
+    .card-content {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .card-category {
+      font-size: 0.75rem;
+      color: var(--gold-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .card-rating {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+      color: var(--gold-primary);
+      font-weight: 700;
+    }
+
+    .card-swatches { display: flex; gap: 0.35rem; margin-top: 0.2rem; }
+    .swatch-dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.3); }
+
+    .card-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 0.75rem;
+    }
+
+    .card-price { font-size: 1.15rem; font-weight: 800; color: #fff; }
+
+    .card-add-btn {
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      padding: 0.45rem 0.9rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .card-add-btn:hover {
+      background: var(--gold-primary);
+      color: #000;
+    }
+
+    /* 'LOAD MORE' (더보기) Button Container */
+    .load-more-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .load-more-btn {
+      background: rgba(22, 20, 32, 0.85);
+      border: 1px solid var(--glass-border);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.95rem 2.8rem;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: var(--transition-smooth);
+    }
+
+    .load-more-btn:hover {
+      border-color: var(--gold-primary);
+      background: rgba(212, 175, 55, 0.2);
+      box-shadow: var(--shadow-gold);
+      transform: translateY(-2px);
+    }
+
+    .load-more-indicator { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* Footer */
+    .site-footer {
+      background: #040406;
+      border-top: 1px solid var(--glass-border);
+      padding: 4rem 2rem 2rem;
+    }
+
+    .footer-inner {
+      max-width: 1300px;
+      margin: 0 auto 3rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-brand p { color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem; }
+    .footer-links { display: flex; gap: 4rem; }
+    .footer-links h4 { font-size: 0.9rem; color: var(--gold-primary); margin-bottom: 1rem; letter-spacing: 1px; }
+    .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; }
+    .footer-bottom { max-width: 1300px; margin: 0 auto; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Cart Drawer */
+    .cart-drawer-backdrop {
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .cart-drawer-backdrop.active { opacity: 1; pointer-events: auto; }
+
+    .cart-drawer-panel {
+      position: fixed; top: 0; right: -450px; width: 420px; max-width: 100vw; height: 100vh;
+      background: #0c0b12; border-left: 1px solid var(--glass-border); z-index: 201;
+      display: flex; flex-direction: column; transition: right 0.35s ease;
+    }
+
+    .cart-drawer-backdrop.active .cart-drawer-panel { right: 0; }
+    .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.6rem; cursor: pointer; }
+    .cart-items-list { flex-grow: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .cart-item-card { display: flex; gap: 1rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); padding: 0.8rem; border-radius: var(--radius-md); align-items: center; }
+    .cart-item-thumb { width: 60px; height: 60px; background: #161422; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
+    .cart-item-info { flex-grow: 1; }
+    .cart-item-info h4 { font-family: var(--font-serif); font-size: 0.95rem; }
+    .cart-item-price { font-size: 0.95rem; font-weight: 800; color: var(--gold-primary); margin-top: 0.2rem; }
+    .cart-footer { padding: 1.5rem; border-top: 1px solid var(--glass-border); background: #07060a; }
+    .cart-total-row { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; }
+    .checkout-btn { width: 100%; background: linear-gradient(135deg, var(--gold-primary), #996515); color: #000; font-weight: 800; font-size: 1rem; padding: 0.95rem; border: none; border-radius: var(--radius-md); cursor: pointer; }
+
+    /* Toast */
+    #toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 300; display: flex; flex-direction: column; gap: 0.75rem; }
+    .toast { background: rgba(20, 18, 28, 0.95); border: 1px solid var(--gold-primary); color: #fff; padding: 0.8rem 1.3rem; border-radius: var(--radius-md); box-shadow: var(--shadow-gold); display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; font-weight: 600; }
+
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 250; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+    .modal-backdrop.hidden { display: none; }
+    .modal-content { position: relative; width: 600px; max-width: 100%; padding: 2.2rem; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- 1. Header Navigation Bar -->
+    <header class="site-header">
+      <div class="nav-inner">
+        <a href="#" class="brand-logo">
+          MAISON <span class="highlight">BAGS</span>
+          <span class="logo-badge">HAUTE COUTURE</span>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="#md-showcase-container" class="active">MD 추천 핸드백</a></li>
+          <li><a href="#popular-products-container">인기 가방</a></li>
+          <li><a href="#">3D 아틀리에</a></li>
+          <li><a href="#">신상품 컬렉션</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <div class="search-box">
+            <input type="text" placeholder="핸드백 검색..." />
+            <span class="search-icon">🔍</span>
+          </div>
+
+          <button id="nav-cart-btn" class="cart-trigger-btn">
+            <span>👜</span>
+            <span>쇼핑백</span>
+            <span id="nav-cart-count" class="cart-count-badge">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main>
+      <!-- 2. MD Recommended Product Showcase (Centered 3D Hero) -->
+      <section id="md-showcase-container" class="md-showcase-section">
+        <div class="section-header-centered">
+          <div class="badge-pill">✨ 2026 HAUTE COUTURE MD PICK</div>
+          <h1>MAISON L'AMOUR 3D CUSTOM HANDBAG</h1>
+          <p>프리미엄 3D 그래픽 엔진으로 완성하는 나만의 맞춤형 럭셔리 핸드백</p>
+        </div>
+
+        <div class="showcase-grid-centered">
+          <!-- Left: 3D Handbag Canvas Container -->
+          <div class="canvas-showcase-frame">
+            <div class="canvas-tag">
+              <span class="tag-badge">👑 3D LIVE ATELIER</span>
+              <span class="tag-badge" style="background:rgba(212,175,55,0.15); color:#f3e5ab;">HERITAGE #01 / 100</span>
+            </div>
+
+            <div id="three-canvas-container" style="width:100%; height:100%;"></div>
+
+            <div class="canvas-controls-overlay">
+              <button id="ctrl-autorotate-btn" class="ctrl-btn active">🔄 <span>자동회전 ON</span></button>
+              <button id="ctrl-reset-cam-btn" class="ctrl-btn">🎯 <span>시점 리셋</span></button>
+            </div>
+          </div>
+
+          <!-- Right: Color & Hardware Customizer Panel -->
+          <div class="customizer-panel glass-card">
+            <div class="toy-title-group">
+              <h2>MAISON L'AMOUR 3D</h2>
+              <span class="toy-edition">HERITAGE CUSTOM EDITION</span>
+              <div class="price-display">
+                <span class="price-main">₩2,450,000</span>
+                <span class="price-original">₩2,900,000</span>
+              </div>
+            </div>
+
+            <p style="color:var(--text-muted); font-size:0.85rem; line-height:1.6;">
+              최상급 칼프스킨 가죽 바디, 덮개 패널, 24K 금속 장식 버클의 색상을 3D 환경에서 직접 커스터마이징하여 단 하나뿐인 시그니처 핸드백을 주문하세요.
+            </p>
+
+            <!-- Color Palette Presets -->
+            <div>
+              <div class="customizer-section-title">🎨 시그니처 컬러 팔레트</div>
+              <div class="preset-colors-grid">
+                <button class="preset-btn active" data-main="#111018" data-trim="#6b1d2f" data-metal="#d4af37" style="background:linear-gradient(135deg, #111018 50%, #6b1d2f 50%); border-color:#d4af37;" title="Classic Noir"></button>
+                <button class="preset-btn" data-main="#6b1d2f" data-trim="#111018" data-metal="#d4af37" style="background:linear-gradient(135deg, #6b1d2f 50%, #111018 50%);" title="Bordeaux Rose"></button>
+                <button class="preset-btn" data-main="#f5f0eb" data-trim="#c5a059" data-metal="#b76e79" style="background:linear-gradient(135deg, #f5f0eb 50%, #c5a059 50%);" title="Cream Ivory"></button>
+                <button class="preset-btn" data-main="#0f4c3a" data-trim="#111018" data-metal="#d4af37" style="background:linear-gradient(135deg, #0f4c3a 50%, #111018 50%);" title="Emerald Luxe"></button>
+                <button class="preset-btn" data-main="#1b263b" data-trim="#778da9" data-metal="#e0e0e0" style="background:linear-gradient(135deg, #1b263b 50%, #778da9 50%);" title="Royal Navy"></button>
+              </div>
+            </div>
+
+            <!-- Custom Slot Color Pickers -->
+            <div>
+              <div class="customizer-section-title">🖌️ 가죽 및 메탈 세부 선택</div>
+              <div class="slot-pickers-group">
+                <div class="color-picker-row">
+                  <span>메인 가죽 (Body)</span>
+                  <div class="color-input-wrapper">
+                    <input type="color" id="picker-main" value="#111018" />
+                    <span class="hex-code" id="hex-main">#111018</span>
+                  </div>
+                </div>
+
+                <div class="color-picker-row">
+                  <span>포인트 트림 (Flap)</span>
+                  <div class="color-input-wrapper">
+                    <input type="color" id="picker-trim" value="#6b1d2f" />
+                    <span class="hex-code" id="hex-trim">#6b1d2f</span>
+                  </div>
+                </div>
+
+                <div class="color-picker-row">
+                  <span>금속 버클 & 체인 (Hardware)</span>
+                  <div class="color-input-wrapper">
+                    <input type="color" id="picker-metal" value="#d4af37" />
+                    <span class="hex-code" id="hex-metal">#d4af37</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Material Finish Selection -->
+            <div>
+              <div class="customizer-section-title">✨ 가죽 텍스처 광택</div>
+              <div class="material-toggle-group">
+                <button class="mat-btn active" data-mat="nappa">내파 샤인</button>
+                <button class="mat-btn" data-mat="saffiano">사피아노</button>
+                <button class="mat-btn" data-mat="matte">매트 레더</button>
+              </div>
+            </div>
+
+            <!-- Add to Cart Button -->
+            <button id="add-hero-to-cart-btn" class="add-to-cart-hero-btn">
+              <span>👜</span>
+              <span>커스텀 핸드백 쇼핑백 담기 (₩2,450,000)</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Popular Products List Section (7 Initial items + 'More' button) -->
+      <section id="popular-products-container" class="popular-products-section"></section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="brand-logo" style="font-size:1.8rem;">MAISON <span class="highlight">BAGS</span></span>
+          <p>파리 오트쿠튀르 감성의 3D 맞춤형 럭셔리 핸드백 부티크</p>
+        </div>
+        <div class="footer-links">
+          <div>
+            <h4>COLLECTION</h4>
+            <ul>
+              <li><a href="#md-showcase-container">MD 추천 핸드백</a></li>
+              <li><a href="#popular-products-container">인기 가방</a></li>
+              <li><a href="#">3D 아틀리에</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>CLIENT CARE</h4>
+            <ul>
+              <li><a href="#">1:1 가죽 맞춤 상담</a></li>
+              <li><a href="#">품질 보증 및 A/S</a></li>
+              <li><a href="#">부티크 매장 안내</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 MAISON BAGS Haute Couture Inc. All rights reserved. Single File Three.js Edition.</p>
+      </div>
+    </footer>
+
+    <!-- Shopping Cart Drawer -->
+    <div id="cart-drawer-container">
+      <div id="cart-backdrop" class="cart-drawer-backdrop">
+        <div class="cart-drawer-panel">
+          <div class="cart-header">
+            <h3>👜 쇼핑백 (<span id="drawer-cart-count">0</span>)</h3>
+            <button id="close-cart-btn" class="close-btn">&times;</button>
+          </div>
+          <div id="cart-items-list" class="cart-items-list"></div>
+          <div id="cart-footer-area" class="cart-footer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick View Modal -->
+    <div id="quick-view-modal" class="modal-backdrop hidden">
+      <div class="modal-content glass-card">
+        <button id="close-modal-btn" class="close-btn" style="position:absolute; top:1rem; right:1.2rem;">&times;</button>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- JavaScript Code: Standalone Application Logic -->
+  <script>
+    // ==========================================================================
+    // 1. Data Definitions (MD Item & 14 Popular Bags)
+    // ==========================================================================
+    const MD_PRODUCT = {
+      id: 'md-maison-handbag',
+      title: "MAISON L'AMOUR 3D",
+      price: 2450000,
+      originalPrice: 2900000,
+      colors: { main: '#111018', trim: '#6b1d2f', metal: '#d4af37' }
+    };
+
+    const POPULAR_PRODUCTS = [
+      { id: 'bag-1', title: "L'ELEGANCE TOTE BAG", category: "Tote", price: 1890000, rating: 4.9, badge: "BEST", swatches: ['#111018', '#6b1d2f', '#d4af37'], icon: 'tote' },
+      { id: 'bag-2', title: "LE MONOGRAMME SHOULDER", category: "Shoulder", price: 2150000, rating: 5.0, badge: "HOT", swatches: ['#c5a059', '#111018', '#b76e79'], icon: 'shoulder' },
+      { id: 'bag-3', title: "LE MAISON SADDLE BAG", category: "Crossbody", price: 1650000, rating: 4.8, badge: "NEW", swatches: ['#0f4c3a', '#d4af37', '#111018'], icon: 'saddle' },
+      { id: 'bag-4', title: "QUILTED CHAIN FLAP", category: "Handbag", price: 2300000, rating: 5.0, badge: "LIMITED", swatches: ['#111018', '#b76e79', '#d4af37'], icon: 'chain' }
+    ];
+
+    // SVG Bag Graphics Helper
+    function createBagSvg(type, color1 = '#111018', color2 = '#d4af37') {
+      switch (type) {
+        case 'tote':
+          return `
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <path d="M 38 40 C 38 20, 62 20, 62 40" fill="none" stroke="${color2}" stroke-width="4" />
+              <polygon points="22,40 78,40 72,88 28,88" fill="${color1}" stroke="${color2}" stroke-width="1.5" />
+              <rect x="42" y="48" width="16" height="24" rx="3" fill="${color2}" />
+            </svg>`;
+        case 'shoulder':
+          return `
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <path d="M 32 45 Q 50 15 68 45" fill="none" stroke="${color2}" stroke-width="4" />
+              <rect x="24" y="45" width="52" height="38" rx="8" fill="${color1}" stroke="${color2}" stroke-width="1.5" />
+              <circle cx="50" cy="62" r="6" fill="${color2}" />
+            </svg>`;
+        case 'saddle':
+          return `
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <path d="M 28 35 L 72 35 L 72 65 C 72 85, 28 85, 28 65 Z" fill="${color1}" stroke="${color2}" stroke-width="1.5" />
+              <path d="M 28 35 L 72 35 L 72 55 Q 50 72 28 55 Z" fill="${color2}" opacity="0.8" />
+              <circle cx="50" cy="60" r="5" fill="#fff" />
+            </svg>`;
+        case 'bucket':
+          return `
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <path d="M 50 20 L 50 42" stroke="${color2}" stroke-width="3" />
+              <ellipse cx="50" cy="42" rx="24" ry="8" fill="${color2}" />
+              <path d="M 26 42 L 30 84 Q 50 92 70 84 L 74 42 Z" fill="${color1}" stroke="${color2}" stroke-width="1.5" />
+            </svg>`;
+        case 'clutch':
+          return `
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <rect x="18" y="42" width="64" height="36" rx="6" fill="${color1}" stroke="${color2}" stroke-width="1.5" />
+              <polygon points="18,42 50,62 82,42" fill="${color2}" opacity="0.85" />
+              <circle cx="50" cy="62" r="4" fill="#fff" />
+            </svg>`;
+        case 'chain':
+        default:
+          return `
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <path d="M 26 45 C 26 22, 74 22, 74 45" fill="none" stroke="${color2}" stroke-dasharray="3,3" stroke-width="3" />
+              <rect x="22" y="45" width="56" height="38" rx="7" fill="${color1}" stroke="${color2}" stroke-width="1.5" />
+              <path d="M 22 45 L 78 45 L 78 62 L 50 74 L 22 62 Z" fill="${color2}" opacity="0.9" />
+              <rect x="44" y="65" width="12" height="8" rx="2" fill="#fff" />
+            </svg>`;
+      }
+    }
+
+    // ==========================================================================
+    // 2. Three.js 3D Handbag Procedural Renderer Class
+    // ==========================================================================
+    class Handbag3DRenderer {
+      constructor(container) {
+        this.container = container;
+        this.width = container.clientWidth || 600;
+        this.height = container.clientHeight || 560;
+
+        this.mainColor = '#111018';
+        this.trimColor = '#6b1d2f';
+        this.metalColor = '#d4af37';
+        this.materialFinish = 'nappa';
+
+        this.init();
+        this.createHandbagModel();
+        this.setupLights();
+        this.setupControls();
+        this.animate();
+
+        window.addEventListener('resize', () => this.onResize());
+      }
+
+      init() {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.1, 1000);
+        this.camera.position.set(0, 0.5, 4.8);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.25;
+
+        this.container.appendChild(this.renderer.domElement);
+      }
+
+      createMaterial(colorHex, isMetal = false) {
+        const color = new THREE.Color(colorHex);
+
+        if (isMetal) {
+          return new THREE.MeshStandardMaterial({
+            color: color,
+            metalness: 0.95,
+            roughness: 0.15,
+          });
+        }
+
+        switch (this.materialFinish) {
+          case 'saffiano':
+            return new THREE.MeshStandardMaterial({
+              color: color,
+              roughness: 0.5,
+              metalness: 0.05
+            });
+          case 'matte':
+            return new THREE.MeshStandardMaterial({
+              color: color,
+              roughness: 0.85,
+              metalness: 0.0
+            });
+          case 'nappa':
+          default:
+            return new THREE.MeshPhysicalMaterial({
+              color: color,
+              roughness: 0.25,
+              metalness: 0.08,
+              clearcoat: 0.6,
+              clearcoatRoughness: 0.1
+            });
+        }
+      }
+
+      createHandbagModel() {
+        this.bagGroup = new THREE.Group();
+        this.bagGroup.position.y = -0.3;
+
+        this.mainMat = this.createMaterial(this.mainColor);
+        this.trimMat = this.createMaterial(this.trimColor);
+        this.metalMat = this.createMaterial(this.metalColor, true);
+
+        // 1. Bag Main Body (Curved trapezoid style)
+        const bodyGeo = new THREE.BoxGeometry(1.6, 1.1, 0.7, 16, 16, 16);
+        const bodyMesh = new THREE.Mesh(bodyGeo, this.mainMat);
+        bodyMesh.castShadow = true;
+        bodyMesh.position.y = 0.55;
+        this.bagGroup.add(bodyMesh);
+
+        // 2. Top Flap Cover
+        const flapGeo = new THREE.BoxGeometry(1.64, 0.65, 0.74);
+        const flapMesh = new THREE.Mesh(flapGeo, this.trimMat);
+        flapMesh.position.set(0, 0.82, 0.01);
+        flapMesh.castShadow = true;
+        this.bagGroup.add(flapMesh);
+
+        // 3. Front Metal Turn-Lock Clasp
+        const lockPlateGeo = new THREE.BoxGeometry(0.28, 0.2, 0.06);
+        const lockPlate = new THREE.Mesh(lockPlateGeo, this.metalMat);
+        lockPlate.position.set(0, 0.6, 0.38);
+        this.bagGroup.add(lockPlate);
+
+        const lockKnobGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.08, 16);
+        lockKnobGeo.rotateX(Math.PI / 2);
+        const lockKnob = new THREE.Mesh(lockKnobGeo, this.metalMat);
+        lockKnob.position.set(0, 0.6, 0.42);
+        this.bagGroup.add(lockKnob);
+
+        // 4. Handles (Tubular curves)
+        const handleCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(-0.45, 1.05, 0),
+          new THREE.Vector3(-0.45, 1.6, 0),
+          new THREE.Vector3(0, 1.75, 0),
+          new THREE.Vector3(0.45, 1.6, 0),
+          new THREE.Vector3(0.45, 1.05, 0)
+        ]);
+        const handleGeo = new THREE.TubeGeometry(handleCurve, 32, 0.045, 16, false);
+        const handleMesh = new THREE.Mesh(handleGeo, this.trimMat);
+        handleMesh.castShadow = true;
+        this.bagGroup.add(handleMesh);
+
+        // Handle Metal Rings
+        const ringGeo = new THREE.TorusGeometry(0.06, 0.02, 16, 32);
+        const ringL = new THREE.Mesh(ringGeo, this.metalMat);
+        ringL.position.set(-0.45, 1.08, 0);
+        this.bagGroup.add(ringL);
+
+        const ringR = new THREE.Mesh(ringGeo, this.metalMat);
+        ringR.position.set(0.45, 1.08, 0);
+        this.bagGroup.add(ringR);
+
+        // 5. Bottom Protective Metal Studs (Feet)
+        const studGeo = new THREE.ConeGeometry(0.04, 0.05, 16);
+        studGeo.rotateX(Math.PI);
+        const studPositions = [
+          [-0.65, 0.0, 0.25], [0.65, 0.0, 0.25],
+          [-0.65, 0.0, -0.25], [0.65, 0.0, -0.25]
+        ];
+        studPositions.forEach(pos => {
+          const stud = new THREE.Mesh(studGeo, this.metalMat);
+          stud.position.set(...pos);
+          this.bagGroup.add(stud);
+        });
+
+        // 6. Podium Display Base
+        const podiumGeo = new THREE.CylinderGeometry(1.4, 1.55, 0.12, 48);
+        const podiumMat = new THREE.MeshStandardMaterial({ color: 0x14121f, roughness: 0.3, metalness: 0.7 });
+        const podium = new THREE.Mesh(podiumGeo, podiumMat);
+        podium.position.y = -0.06;
+        podium.receiveShadow = true;
+        this.bagGroup.add(podium);
+
+        const ringGlowGeo = new THREE.TorusGeometry(1.39, 0.015, 16, 64);
+        ringGlowGeo.rotateX(Math.PI / 2);
+        const ringGlow = new THREE.Mesh(ringGlowGeo, this.metalMat);
+        ringGlow.position.y = -0.005;
+        this.bagGroup.add(ringGlow);
+
+        this.scene.add(this.bagGroup);
+      }
+
+      setupLights() {
+        const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+        this.scene.add(ambient);
+
+        this.keyLight = new THREE.DirectionalLight(0xfff5e6, 1.6);
+        this.keyLight.position.set(4, 5, 4);
+        this.keyLight.castShadow = true;
+        this.keyLight.shadow.mapSize.width = 2048;
+        this.keyLight.shadow.mapSize.height = 2048;
+        this.scene.add(this.keyLight);
+
+        const fillLight = new THREE.DirectionalLight(0xd4af37, 0.6);
+        fillLight.position.set(-4, 2, -2);
+        this.scene.add(fillLight);
+
+        const rimLight = new THREE.DirectionalLight(0xffffff, 1.1);
+        rimLight.position.set(0, 4, -4);
+        this.scene.add(rimLight);
+      }
+
+      setupControls() {
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.05;
+        this.controls.maxPolarAngle = Math.PI / 2 + 0.05;
+        this.controls.autoRotate = true;
+        this.controls.autoRotateSpeed = 2.0;
+        this.controls.target.set(0, 0.6, 0);
+      }
+
+      updateMaterials() {
+        if (!this.bagGroup) return;
+        const newMain = this.createMaterial(this.mainColor);
+        const newTrim = this.createMaterial(this.trimColor);
+        const newMetal = this.createMaterial(this.metalColor, true);
+
+        this.bagGroup.traverse(child => {
+          if (child.isMesh && child.material) {
+            if (child.material === this.mainMat) child.material = newMain;
+            else if (child.material === this.trimMat) child.material = newTrim;
+            else if (child.material === this.metalMat) child.material = newMetal;
+          }
+        });
+
+        this.mainMat = newMain;
+        this.trimMat = newTrim;
+        this.metalMat = newMetal;
+      }
+
+      setMainColor(hex) { this.mainColor = hex; this.updateMaterials(); }
+      setTrimColor(hex) { this.trimColor = hex; this.updateMaterials(); }
+      setMetalColor(hex) { this.metalColor = hex; this.updateMaterials(); }
+      setMaterialFinish(finish) { this.materialFinish = finish; this.updateMaterials(); }
+
+      toggleAutoRotate() {
+        if (this.controls) {
+          this.controls.autoRotate = !this.controls.autoRotate;
+          return this.controls.autoRotate;
+        }
+        return false;
+      }
+
+      resetCamera() {
+        if (this.camera && this.controls) {
+          this.camera.position.set(0, 0.5, 4.8);
+          this.controls.target.set(0, 0.6, 0);
+          this.controls.update();
+        }
+      }
+
+      onResize() {
+        this.width = this.container.clientWidth;
+        this.height = this.container.clientHeight;
+        this.camera.aspect = this.width / this.height;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.width, this.height);
+      }
+
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        if (this.controls) this.controls.update();
+        if (this.renderer && this.scene && this.camera) {
+          this.renderer.render(this.scene, this.camera);
+        }
+      }
+    }
+
+    // ==========================================================================
+    // 3. Application State & UI Controller
+    // ==========================================================================
+    let cartItems = [];
+    let visibleProductsCount = 4; // REQUIREMENT: 4 products total
+    let currentCategoryFilter = 'ALL';
+    let bagRendererInstance = null;
+
+    function showToast(message, icon = '👜') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(40px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 2800);
+    }
+
+    function updateCartUI() {
+      const navBadge = document.getElementById('nav-cart-count');
+      const drawerBadge = document.getElementById('drawer-cart-count');
+      if (navBadge) navBadge.textContent = cartItems.length;
+      if (drawerBadge) drawerBadge.textContent = cartItems.length;
+
+      const itemsList = document.getElementById('cart-items-list');
+      const footerArea = document.getElementById('cart-footer-area');
+
+      if (cartItems.length === 0) {
+        itemsList.innerHTML = `
+          <div style="text-align:center; margin:auto; color:var(--text-muted);">
+            <span style="font-size:3rem; display:block; margin-bottom:0.5rem;">🛍️</span>
+            <h4>쇼핑백이 비어 있습니다.</h4>
+            <p style="font-size:0.85rem; margin-top:0.3rem;">원하는 럭셔리 가방을 담아보세요.</p>
+          </div>
+        `;
+        footerArea.innerHTML = '';
+      } else {
+        const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+        itemsList.innerHTML = cartItems.map((item, idx) => `
+          <div class="cart-item-card">
+            <div class="cart-item-thumb">
+              <span style="font-size:1.8rem;">👜</span>
+            </div>
+            <div class="cart-item-info">
+              <h4>${item.title}</h4>
+              ${item.colors ? `
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${item.colors.main};"></span> Main |
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${item.colors.metal};"></span> Hardware
+                </div>
+              ` : ''}
+              <div class="cart-item-price">₩${item.price.toLocaleString()}</div>
+            </div>
+            <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;">🗑️</button>
+          </div>
+        `).join('');
+
+        footerArea.innerHTML = `
+          <div class="cart-total-row">
+            <span>총 결제금액</span>
+            <span style="color:var(--gold-primary);">₩${total.toLocaleString()}</span>
+          </div>
+          <button onclick="checkoutCart()" class="checkout-btn">
+            💳 주문 결제하기 (₩${total.toLocaleString()})
+          </button>
+        `;
+      }
+    }
+
+    function toggleCart(open) {
+      const backdrop = document.getElementById('cart-backdrop');
+      if (backdrop) {
+        if (open) backdrop.classList.add('active');
+        else backdrop.classList.remove('active');
+      }
+    }
+
+    function addToCart(item) {
+      cartItems.push(item);
+      updateCartUI();
+      if (item.colors) {
+        confetti({ particleCount: 90, spread: 60, origin: { y: 0.7 } });
+        showToast(`'${item.title}' (커스텀 가방)이 쇼핑백에 담겼습니다!`);
+      } else {
+        showToast(`'${item.title}' 가방이 쇼핑백에 담겼습니다!`);
+      }
+      toggleCart(true);
+    }
+
+    function removeFromCart(idx) {
+      const removed = cartItems.splice(idx, 1);
+      updateCartUI();
+      if (removed.length > 0) showToast(`'${removed[0].title}' 항목을 삭제했습니다.`, '🗑️');
+    }
+
+    function checkoutCart() {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+      showToast('럭셔리 가방 주문이 성공적으로 접수되었습니다!', '🎉');
+      cartItems = [];
+      updateCartUI();
+      toggleCart(false);
+    }
+
+    function renderPopularProductsGrid() {
+      const container = document.getElementById('popular-products-container');
+      if (!container) return;
+
+      const filtered = currentCategoryFilter === 'ALL' 
+        ? POPULAR_PRODUCTS 
+        : POPULAR_PRODUCTS.filter(p => p.category.toUpperCase() === currentCategoryFilter);
+
+      const visibleSlice = filtered.slice(0, visibleProductsCount);
+      const hasMore = visibleProductsCount < filtered.length;
+
+      container.innerHTML = `
+        <div class="products-header-bar">
+          <div>
+            <h2>🔥 인기 핸드백 & 가방</h2>
+            <span class="products-count-badge">전체 ${filtered.length}개 상품 중 <strong style="color:var(--gold-primary);">${visibleSlice.length}개</strong> 노출</span>
+          </div>
+
+          <div class="category-tabs">
+            <button class="tab-btn ${currentCategoryFilter === 'ALL' ? 'active' : ''}" onclick="setCategoryFilter('ALL')">전체</button>
+            <button class="tab-btn ${currentCategoryFilter === 'TOTE' ? 'active' : ''}" onclick="setCategoryFilter('TOTE')">Tote</button>
+            <button class="tab-btn ${currentCategoryFilter === 'SHOULDER' ? 'active' : ''}" onclick="setCategoryFilter('SHOULDER')">Shoulder</button>
+            <button class="tab-btn ${currentCategoryFilter === 'CROSSBODY' ? 'active' : ''}" onclick="setCategoryFilter('CROSSBODY')">Crossbody</button>
+            <button class="tab-btn ${currentCategoryFilter === 'CLUTCH' ? 'active' : ''}" onclick="setCategoryFilter('CLUTCH')">Clutch</button>
+          </div>
+        </div>
+
+        <!-- Popular Products Grid (Initially 7 Items) -->
+        <div class="products-grid">
+          ${visibleSlice.map(p => `
+            <div class="product-card">
+              <div class="card-img-wrapper">
+                <span class="card-badge ${p.badge.toLowerCase()}">${p.badge}</span>
+                ${createBagSvg(p.icon, p.swatches[0], p.swatches[2])}
+                <button class="card-quick-btn" onclick="openQuickView('${p.id}')">👁️</button>
+              </div>
+
+              <div class="card-content">
+                <span class="card-category">${p.category} BAG</span>
+                <h3 class="card-title">${p.title}</h3>
+                <div class="card-rating">⭐ ${p.rating}</div>
+                <div class="card-swatches">
+                  ${p.swatches.map(c => `<span class="swatch-dot" style="background:${c};"></span>`).join('')}
+                </div>
+
+                <div class="card-bottom-row">
+                  <span class="card-price">₩${p.price.toLocaleString()}</span>
+                  <button class="card-add-btn" onclick="addToCart(POPULAR_PRODUCTS.find(x=>x.id==='${p.id}'))">
+                    👜 담기
+                  </button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- 'LOAD MORE' (더보기) Button Container -->
+        ${hasMore ? `
+          <div class="load-more-container">
+            <button class="load-more-btn" onclick="loadMoreProducts()">
+              <span>인기 가방 더보기 (+${filtered.length - visibleProductsCount}개)</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <span class="load-more-indicator">현재 ${visibleSlice.length}개 노출 중 / 총 ${filtered.length}개 상품</span>
+          </div>
+        ` : `
+          <div class="load-more-container">
+            <span class="load-more-indicator" style="color:var(--gold-primary); font-weight:700;">
+              ✨ 모든 인기 핸드백 컬렉션을 확인하셨습니다.
+            </span>
+          </div>
+        `}
+      `;
+    }
+
+    function setCategoryFilter(cat) {
+      currentCategoryFilter = cat;
+      visibleProductsCount = 4; // Reset to 4 items
+      renderPopularProductsGrid();
+    }
+
+    function loadMoreProducts() {
+      visibleProductsCount += 7; // Expand to load next batch!
+      renderPopularProductsGrid();
+    }
+
+    function openQuickView(id) {
+      const item = POPULAR_PRODUCTS.find(p => p.id === id);
+      if (!item) return;
+      const modal = document.getElementById('quick-view-modal');
+      const body = document.getElementById('modal-body');
+      body.innerHTML = `
+        <div style="text-align:center;">
+          <span class="badge-pill">${item.category} BAG</span>
+          <h2 style="font-family:var(--font-serif); font-size:1.8rem; margin:0.5rem 0;">${item.title}</h2>
+          <div style="font-size:1.6rem; font-weight:800; color:var(--gold-primary); margin-bottom:1rem;">
+            ₩${item.price.toLocaleString()}
+          </div>
+          <div style="height:200px; background:rgba(255,255,255,0.03); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; margin-bottom:1.5rem;">
+            ${createBagSvg(item.icon, item.swatches[0], item.swatches[2])}
+          </div>
+          <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.6; margin-bottom:1.5rem;">
+            파리 공방에서 최상급 풀그레인 가죽으로 스티치 처리된 파인 레더 핸드백입니다.
+          </p>
+          <button class="add-to-cart-hero-btn" onclick="addToCart(POPULAR_PRODUCTS.find(x=>x.id==='${item.id}')); document.getElementById('quick-view-modal').classList.add('hidden');">
+            👜 쇼핑백에 담기
+          </button>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    // Initialize Page Controls & 3D Renderer
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Initialize 3D Canvas
+      const canvasFrame = document.getElementById('three-canvas-container');
+      if (canvasFrame) {
+        bagRendererInstance = new Handbag3DRenderer(canvasFrame);
+      }
+
+      // Auto rotate & reset view
+      document.getElementById('ctrl-autorotate-btn')?.addEventListener('click', (e) => {
+        const active = bagRendererInstance.toggleAutoRotate();
+        e.currentTarget.classList.toggle('active', active);
+      });
+      document.getElementById('ctrl-reset-cam-btn')?.addEventListener('click', () => {
+        bagRendererInstance.resetCamera();
+      });
+
+      // Color Pickers
+      const pMain = document.getElementById('picker-main');
+      const pTrim = document.getElementById('picker-trim');
+      const pMetal = document.getElementById('picker-metal');
+
+      pMain?.addEventListener('input', (e) => {
+        document.getElementById('hex-main').textContent = e.target.value;
+        bagRendererInstance.setMainColor(e.target.value);
+      });
+      pTrim?.addEventListener('input', (e) => {
+        document.getElementById('hex-trim').textContent = e.target.value;
+        bagRendererInstance.setTrimColor(e.target.value);
+      });
+      pMetal?.addEventListener('input', (e) => {
+        document.getElementById('hex-metal').textContent = e.target.value;
+        bagRendererInstance.setMetalColor(e.target.value);
+      });
+
+      // Preset Palette Buttons
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const m = btn.dataset.main;
+          const t = btn.dataset.trim;
+          const metal = btn.dataset.metal;
+
+          pMain.value = m; pTrim.value = t; pMetal.value = metal;
+          document.getElementById('hex-main').textContent = m;
+          document.getElementById('hex-trim').textContent = t;
+          document.getElementById('hex-metal').textContent = metal;
+
+          bagRendererInstance.setMainColor(m);
+          bagRendererInstance.setTrimColor(t);
+          bagRendererInstance.setMetalColor(metal);
+        });
+      });
+
+      // Material Finish Buttons
+      document.querySelectorAll('.mat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.mat-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          bagRendererInstance.setMaterialFinish(btn.dataset.mat);
+        });
+      });
+
+      // Add Custom Hero Bag to Cart Button
+      document.getElementById('add-hero-to-cart-btn')?.addEventListener('click', () => {
+        const item = {
+          ...MD_PRODUCT,
+          colors: { main: pMain.value, trim: pTrim.value, metal: pMetal.value }
+        };
+        addToCart(item);
+      });
+
+      // Header Cart Button
+      document.getElementById('nav-cart-btn')?.addEventListener('click', () => toggleCart(true));
+      document.getElementById('close-cart-btn')?.addEventListener('click', () => toggleCart(false));
+      document.getElementById('cart-backdrop')?.addEventListener('click', (e) => {
+        if (e.target.id === 'cart-backdrop') toggleCart(false);
+      });
+      document.getElementById('close-modal-btn')?.addEventListener('click', () => {
+        document.getElementById('quick-view-modal').classList.add('hidden');
+      });
+
+      // 2. Render Popular Products Grid
+      renderPopularProductsGrid();
+      updateCartUI();
+    });
+  </script>
+</body>
+</html>
